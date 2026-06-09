@@ -37,7 +37,7 @@ export default function RegisterForm() {
   return (
     <div className="w-full max-w-md rounded-3xl border border-pink-100 bg-white/95 p-6 shadow-[0_10px_60px_rgba(244,114,182,.15)] backdrop-blur-xl sm:p-8">
       {/* Heading */}
-      <h1 className="bg-linear-to-r from-rose-400 to-pink-400 bg-clip-text text-center text-3xl font-bold text-transparent" >
+      <h1 className="bg-linear-to-r from-rose-400 to-pink-400 bg-clip-text text-center text-3xl font-bold text-transparent">
         Create Your Account
       </h1>
 
