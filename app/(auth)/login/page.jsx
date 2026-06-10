@@ -1,6 +1,5 @@
 import LoginForm from "./LoginForm";
 
-
 export default function LoginPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-pink-50">
