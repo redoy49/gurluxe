@@ -4,56 +4,56 @@ const products = [
   {
     id: 1,
     name: "Eve Micro Bag",
-    image: "/products/product-1.jpg",
+    image: "/products/featured/product-1.jpg",
     price: "৳ 1,949",
     oldPrice: "৳ 2,999",
   },
   {
     id: 2,
     name: "Effie Shoulder Bag",
-    image: "/products/product-2.jpg",
+    image: "/products/featured/product-2.jpg",
     price: "৳ 2,599",
     oldPrice: "৳ 3,999",
   },
   {
     id: 3,
     name: "Mindy Crossbody Bag",
-    image: "/products/product-3.jpg",
+    image: "/products/featured/product-3.jpg",
     price: "৳ 2,299",
     oldPrice: "৳ 3,499",
   },
   {
     id: 4,
     name: "Luxe Tote Bag",
-    image: "/products/product-4.jpg",
+    image: "/products/featured/product-4.jpg",
     price: "৳ 3,199",
     oldPrice: "৳ 4,499",
   },
   {
     id: 5,
     name: "Classic Satchel",
-    image: "/products/product-5.jpg",
+    image: "/products/featured/product-5.jpg",
     price: "৳ 2,899",
     oldPrice: "৳ 3,999",
   },
   {
     id: 6,
     name: "Premium Hand Bag",
-    image: "/products/product-6.jpg",
+    image: "/products/featured/product-6.jpg",
     price: "৳ 3,499",
     oldPrice: "৳ 4,999",
   },
   {
     id: 7,
     name: "Luxury Sling Bag",
-    image: "/products/product-7.jpg",
+    image: "/products/featured/product-7.jpg",
     price: "৳ 2,499",
     oldPrice: "৳ 3,699",
   },
   {
     id: 8,
     name: "Daily Tote",
-    image: "/products/product-8.jpg",
+    image: "/products/featured/product-8.jpg",
     price: "৳ 2,799",
     oldPrice: "৳ 3,899",
   },
@@ -64,10 +64,11 @@ export default function FeaturedProducts() {
     <section className="bg-white py-16">
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         {/* Heading */}
-        <div className="mb-10 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-pink-500">
-            FEATURED PRODUCTS
-          </p>
+        <div className="mb-16 text-center">
+          <h2 className="text-3xl font-bold text-[#2b1d28] md:text-5xl">
+            Our Featured{" "}
+            <span className="font-medium italic">Products</span>
+          </h2>
         </div>
 
         {/* Products Grid */}
@@ -75,7 +76,7 @@ export default function FeaturedProducts() {
           {products.map((product) => (
             <Link
               key={product.id}
-              href={`/products/${product.id}`}
+              href={`/products/featured/${product.id}`}
               className="group w-full"
             >
               {/* Product Image */}
@@ -83,7 +84,7 @@ export default function FeaturedProducts() {
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="sm:h-75 md:h-85 lg:h-110 xl:h-120 w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                  className="sm:h-75 md:h-85 lg:h-110 xl:h-120 w-full object-cover transition duration-500 group-hover:scale-[1.02] rounded-xl"
                 />
               </div>
 

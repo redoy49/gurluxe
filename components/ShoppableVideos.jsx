@@ -56,15 +56,16 @@ export default function StoriesSection() {
   return (
     <section className="bg-white py-16">
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
-        {/* Heading + Navigation */}
-        <div className="mb-10 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-pink-500">
-              STORIES THAT LEAD
-            </p>
+        {/* Heading */}
+        <div className="relative mb-16">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-[#2b1d28] md:text-5xl">
+              Watch Videos <span className="font-medium italic"> and Shop</span>
+            </h2>
           </div>
 
-          <div className="hidden gap-3 md:flex">
+          {/* Navigation */}
+          <div className="absolute right-0 top-1/2 hidden -translate-y-1/2 gap-3 md:flex">
             <button className="stories-prev flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white transition hover:border-pink-300 hover:text-pink-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -109,10 +110,7 @@ export default function StoriesSection() {
               key={story.id}
               className="w-80!" // same width as before
             >
-              <Link
-                href={`/products/${story.id}`}
-                className="group block"
-              >
+              <Link href={`/products/${story.id}`} className="group block">
                 {/* Video Card */}
                 <div className="overflow-hidden bg-white">
                   <video
@@ -133,9 +131,7 @@ export default function StoriesSection() {
                   </p>
 
                   <div className="mt-1 flex items-center gap-3">
-                    <p className="text-[13px] text-gray-900">
-                      {story.price}
-                    </p>
+                    <p className="text-[13px] text-gray-900">{story.price}</p>
 
                     <p className="text-[13px] text-gray-400 line-through">
                       {story.oldPrice}

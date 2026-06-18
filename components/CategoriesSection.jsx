@@ -64,18 +64,16 @@ export default function ShopByCategory() {
     <section className="bg-white py-16">
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-10 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-pink-500">
-              SHOP BY CATEGORY
-            </p>
-
-            <h2 className="mt-3 text-3xl font-bold text-gray-900">
-              Find Your Perfect Bag
+        <div className="relative mb-16">
+          {/* Center Heading */}
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-[#2b1d28] md:text-5xl">
+              Find Your <span className="font-medium italic">Perfect Bag</span>
             </h2>
           </div>
 
-          <div className="hidden gap-3 md:flex">
+          {/* Navigation */}
+          <div className="absolute right-0 top-1/2 hidden -translate-y-1/2 gap-3 md:flex">
             <button className="categories-prev flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white transition hover:border-pink-300 hover:text-pink-500">
               <ChevronLeft size={18} />
             </button>
@@ -97,14 +95,8 @@ export default function ShopByCategory() {
           spaceBetween={16}
         >
           {categories.map((category) => (
-            <SwiperSlide
-              key={category.id}
-              className="w-80!"
-            >
-              <Link
-                href={category.href}
-                className="group block"
-              >
+            <SwiperSlide key={category.id} className="w-80!">
+              <Link href={category.href} className="group block">
                 {/* Image */}
                 <div className="overflow-hidden bg-gray-100">
                   <img
