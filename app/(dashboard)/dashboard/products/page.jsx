@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import { getProducts } from "@/lib/queries/products";
+import Image from "next/image";
+import DeleteProductButton from "./DeleteProductButton";
 
 export default async function ProductsPage() {
   const products = await getProducts();
@@ -67,11 +69,15 @@ export default async function ProductsPage() {
                   {/* Product */}
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-4">
-                      <img
-                        src={product.thumbnail || product.images?.[0]}
-                        alt={product.name}
-                        className="h-16 w-16 rounded-lg object-cover"
-                      />
+                      {product.images?.[0]?.url && (
+                        <Image
+                          src={product.images[0].url}
+                          alt={product.name}
+                          width={64}
+                          height={64}
+                          className="h-16 w-16 rounded-lg object-cover"
+                        />
+                      )}
 
                       <div>
                         <h3 className="font-medium text-gray-900">
@@ -133,9 +139,7 @@ export default async function ProductsPage() {
                         <Pencil size={18} />
                       </Link>
 
-                      <button className="rounded-lg p-2 text-gray-600 transition hover:bg-red-100 hover:text-red-600">
-                        <Trash2 size={18} />
-                      </button>
+                      <DeleteProductButton id={product._id.toString()} />
                     </div>
                   </td>
                 </tr>

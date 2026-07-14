@@ -22,7 +22,7 @@ export default function FeaturedProducts({ products }) {
               {/* Product Image */}
               <div className="overflow-hidden bg-white">
                 <img
-                  src={product.images[0]}
+                  src={product.images[0].url}
                   alt={product.name}
                   className="sm:h-75 md:h-85 lg:h-110 xl:h-120 w-full object-cover transition duration-500 group-hover:scale-[1.02]"
                 />

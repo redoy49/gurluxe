@@ -15,6 +15,7 @@ export default function ProductForm() {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(productSchema),
@@ -34,13 +35,27 @@ export default function ProductForm() {
     },
   });
 
+  const imageFiles = watch("images");
+
   const onSubmit = (data) => {
     startTransition(async () => {
-      const result = await addProduct(data);
+      const formData = new FormData();
+
+      // Remove images before JSON stringify
+      const { images, ...product } = data;
+
+      formData.append("product", JSON.stringify(product));
+
+      if (images?.length) {
+        Array.from(images).forEach((file) => {
+          formData.append("images", file);
+        });
+      }
+
+      const result = await addProduct(formData);
 
       if (result.success) {
         alert("Product added successfully");
-
         reset();
       } else {
         alert(result.message);
@@ -85,27 +100,17 @@ export default function ProductForm() {
               onChange={(e) => {
                 const name = e.target.value;
 
-                setValue(
-                  "category",
-
-                  {
-                    name,
-
-                    slug: name.toLowerCase().replaceAll(" ", "-"),
-                  },
-                );
+                setValue("category", {
+                  name,
+                  slug: name.toLowerCase().replaceAll(" ", "-"),
+                });
               }}
             >
               <option value="Sling Bags">Sling Bags</option>
-
               <option value="Tote Bags">Tote Bags</option>
-
               <option value="Clutches">Clutches</option>
-
               <option value="Satchel Bags">Satchel Bags</option>
-
               <option value="Crossbody Bags">Crossbody Bags</option>
-
               <option value="Hand Bags">Hand Bags</option>
             </select>
           </div>
@@ -155,12 +160,24 @@ export default function ProductForm() {
           className="mb-5 w-full rounded-lg border p-4"
         />
 
+        {errors.shortDescription && (
+          <p className="mb-4 text-sm text-red-500">
+            {errors.shortDescription.message}
+          </p>
+        )}
+
         <textarea
           {...register("description")}
           placeholder="Detailed product description"
           rows={6}
           className="w-full rounded-lg border p-4"
         />
+
+        {errors.description && (
+          <p className="mt-2 text-sm text-red-500">
+            {errors.description.message}
+          </p>
+        )}
       </div>
 
       {/* Product Details */}
@@ -198,17 +215,28 @@ export default function ProductForm() {
       {/* Media */}
 
       <div className="rounded-xl border bg-white p-6">
-        <h2 className="mb-6 text-lg font-semibold">Images & Video</h2>
+        <h2 className="mb-6 text-lg font-semibold">Product Images</h2>
 
-        {/* Cloudinary integration later */}
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          {...register("images")}
+          className="w-full rounded-lg border p-3"
+        />
 
-        <input type="file" disabled className="w-full rounded-lg border p-3" />
+        {imageFiles?.length > 0 && (
+          <p className="mt-3 text-sm text-gray-500">
+            {imageFiles.length} image(s) selected
+          </p>
+        )}
       </div>
 
       {/* Submit */}
 
       <div className="flex justify-end">
         <button
+          type="submit"
           disabled={isPending}
           className="rounded-lg bg-black px-8 py-3 font-medium text-white disabled:opacity-50"
         >
@@ -219,17 +247,7 @@ export default function ProductForm() {
   );
 }
 
-function Field({
-  label,
-
-  placeholder,
-
-  type = "text",
-
-  register,
-
-  error,
-}) {
+function Field({ label, placeholder, type = "text", register, error }) {
   return (
     <div>
       <label className="mb-2 block text-sm font-medium">{label}</label>
@@ -246,15 +264,10 @@ function Field({
   );
 }
 
-function Check({
-  label,
-
-  register,
-}) {
+function Check({ label, register }) {
   return (
     <label className="mb-3 flex items-center gap-3">
       <input type="checkbox" {...register} />
-
       <span>{label}</span>
     </label>
   );
