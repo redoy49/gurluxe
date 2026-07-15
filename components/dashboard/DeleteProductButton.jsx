@@ -2,7 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { deleteProduct } from "./add/action";
+import { deleteProduct } from "@/app/(dashboard)/dashboard/products/action";
 
 export default function DeleteProductButton({ id }) {
   const router = useRouter();

@@ -1,10 +1,10 @@
 "use server";
 
 import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
 import { dbConnect } from "@/lib/mongoDb";
 import { uploadToCloudinary } from "@/lib/cloudinary/upload";
 import { deleteFromCloudinary } from "@/lib/cloudinary/destroy";
-import { revalidatePath } from "next/cache";
 
 export async function addProduct(formData) {
   try {
@@ -27,50 +27,41 @@ export async function addProduct(formData) {
       name: productData.name,
       slug: productData.slug,
       sku: productData.sku,
-
       category: {
         name: productData.category.name,
         slug: productData.category.slug,
       },
-
       images: uploadedImages,
       videos: [],
-
       price: Number(productData.price),
       comparePrice: Number(productData.comparePrice) || 0,
-
       stock: Number(productData.stock),
       soldCount: 0,
-
       flags: {
         featured: productData.featured || false,
         newArrival: productData.newArrival || false,
         bestSeller: productData.bestSeller || false,
       },
-
       status: "active",
-
       shortDescription: productData.shortDescription,
       description: productData.description,
-
       colors: productData.colors
         ? productData.colors.split(",").map((color) => color.trim())
         : [],
-
       materials: productData.materials
         ? productData.materials.split(",").map((material) => material.trim())
         : [],
-
       rating: {
         average: 0,
         count: 0,
       },
-
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     const result = await db.collection("products").insertOne(product);
+
+    revalidatePath("/dashboard/products");
 
     return {
       success: true,
@@ -100,37 +91,42 @@ export async function getProducts() {
 export async function getProductById(id) {
   const db = await dbConnect();
 
-  return await db.collection("products").findOne({
+  const product = await db.collection("products").findOne({
     _id: new ObjectId(id),
   });
+
+  if (!product) return null;
+
+  return {
+    ...product,
+    _id: product._id.toString(),
+  };
 }
 
-export async function updateProduct(id, updateData) {
-  try {
-    const db = await dbConnect();
+export async function updateProduct(formData) {
+  const db = await dbConnect();
 
-    await db.collection("products").updateOne(
-      {
-        _id: new ObjectId(id),
-      },
-      {
-        $set: {
-          ...updateData,
-          updatedAt: new Date(),
-        },
-      },
-    );
+  const id = formData.get("_id");
+  const updateData = JSON.parse(formData.get("product"));
 
-    return {
-      success: true,
-      message: "Product updated successfully",
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.message,
-    };
-  }
+  await db.collection("products").updateOne(
+    {
+      _id: new ObjectId(id),
+    },
+    {
+      $set: {
+        ...updateData,
+        updatedAt: new Date(),
+      },
+    }
+  );
+
+  revalidatePath("/dashboard/products");
+
+  return {
+    success: true,
+    message: "Product updated successfully",
+  };
 }
 
 export async function deleteProduct(id) {

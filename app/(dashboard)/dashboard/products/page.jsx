@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-
 import { getProducts } from "@/lib/queries/products";
 import Image from "next/image";
-import DeleteProductButton from "./DeleteProductButton";
+import DeleteProductButton from "@/components/dashboard/DeleteProductButton";
 
 export default async function ProductsPage() {
   const products = await getProducts();
@@ -133,7 +132,7 @@ export default async function ProductsPage() {
                   <td className="px-6 py-5">
                     <div className="flex items-center justify-center gap-2">
                       <Link
-                        href={`/dashboard/products/${product._id}/edit`}
+                        href={`/dashboard/products/edit/${product._id}`}
                         className="rounded-lg p-2 text-gray-600 transition hover:bg-blue-100 hover:text-blue-600"
                       >
                         <Pencil size={18} />

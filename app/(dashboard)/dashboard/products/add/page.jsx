@@ -1,4 +1,5 @@
-import ProductForm from "./ProductForm";
+import ProductForm from "@/components/dashboard/ProductForm";
+import { addProduct } from "../action";
 
 export default function AddProductPage() {
   return (
@@ -12,8 +13,7 @@ export default function AddProductPage() {
         </p>
       </div>
 
-      {/* Form */}
-      <ProductForm />
+      <ProductForm action={addProduct} submitText="Add Product" />
     </div>
   );
 }
