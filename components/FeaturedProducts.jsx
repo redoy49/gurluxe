@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 export default function FeaturedProducts({ products }) {
+  
   return (
     <section className="bg-white py-16">
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">

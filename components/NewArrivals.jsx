@@ -8,66 +8,66 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 
-const products = [
-  {
-    id: 1,
-    name: "New Eve Micro Bag",
-    image: "/products/new-arrivals/new-1.jpg",
-    price: "৳ 2,149",
-    oldPrice: "৳ 2,999",
-  },
-  {
-    id: 2,
-    name: "Urban Tote Bag",
-    image: "/products/new-arrivals/new-2.jpg",
-    price: "৳ 2,699",
-    oldPrice: "৳ 3,499",
-  },
-  {
-    id: 3,
-    name: "Luxury Crossbody",
-    image: "/products/new-arrivals/new-3.jpg",
-    price: "৳ 3,199",
-    oldPrice: "৳ 4,299",
-  },
-  {
-    id: 4,
-    name: "Classic Hand Bag",
-    image: "/products/new-arrivals/new-4.jpg",
-    price: "৳ 2,899",
-    oldPrice: "৳ 3,999",
-  },
-  {
-    id: 5,
-    name: "Premium Tote",
-    image: "/products/new-arrivals/new-5.jpg",
-    price: "৳ 3,499",
-    oldPrice: "৳ 4,699",
-  },
-  {
-    id: 6,
-    name: "Elegant Satchel",
-    image: "/products/new-arrivals/new-6.jpg",
-    price: "৳ 2,799",
-    oldPrice: "৳ 3,799",
-  },
-  {
-    id: 7,
-    name: "Fashion Sling Bag",
-    image: "/products/new-arrivals/new-7.jpg",
-    price: "৳ 2,399",
-    oldPrice: "৳ 3,299",
-  },
-  {
-    id: 8,
-    name: "Daily Carry Tote",
-    image: "/products/new-arrivals/new-8.jpg",
-    price: "৳ 2,999",
-    oldPrice: "৳ 3,999",
-  },
-];
+// const products = [
+//   {
+//     id: 1,
+//     name: "New Eve Micro Bag",
+//     image: "/products/new-arrivals/new-1.jpg",
+//     price: "৳ 2,149",
+//     oldPrice: "৳ 2,999",
+//   },
+//   {
+//     id: 2,
+//     name: "Urban Tote Bag",
+//     image: "/products/new-arrivals/new-2.jpg",
+//     price: "৳ 2,699",
+//     oldPrice: "৳ 3,499",
+//   },
+//   {
+//     id: 3,
+//     name: "Luxury Crossbody",
+//     image: "/products/new-arrivals/new-3.jpg",
+//     price: "৳ 3,199",
+//     oldPrice: "৳ 4,299",
+//   },
+//   {
+//     id: 4,
+//     name: "Classic Hand Bag",
+//     image: "/products/new-arrivals/new-4.jpg",
+//     price: "৳ 2,899",
+//     oldPrice: "৳ 3,999",
+//   },
+//   {
+//     id: 5,
+//     name: "Premium Tote",
+//     image: "/products/new-arrivals/new-5.jpg",
+//     price: "৳ 3,499",
+//     oldPrice: "৳ 4,699",
+//   },
+//   {
+//     id: 6,
+//     name: "Elegant Satchel",
+//     image: "/products/new-arrivals/new-6.jpg",
+//     price: "৳ 2,799",
+//     oldPrice: "৳ 3,799",
+//   },
+//   {
+//     id: 7,
+//     name: "Fashion Sling Bag",
+//     image: "/products/new-arrivals/new-7.jpg",
+//     price: "৳ 2,399",
+//     oldPrice: "৳ 3,299",
+//   },
+//   {
+//     id: 8,
+//     name: "Daily Carry Tote",
+//     image: "/products/new-arrivals/new-8.jpg",
+//     price: "৳ 2,999",
+//     oldPrice: "৳ 3,999",
+//   },
+// ];
 
-export default function NewArrivals() {
+export default function NewArrivals({ products }) {
   return (
     <section className="bg-white py-16">
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
@@ -105,14 +105,11 @@ export default function NewArrivals() {
         >
           {products.map((product) => (
             <SwiperSlide key={product.id} className="w-80!">
-              <Link
-                href={`/products/new-arrivals/${product.id}`}
-                className="group block"
-              >
+              <Link href={`/shop/${product.slug}`} className="group block">
                 {/* Product Image */}
                 <div className="overflow-hidden bg-white">
                   <img
-                    src={product.image}
+                    src={product.images[0].url}
                     alt={product.name}
                     className="h-105 w-full rounded-sm object-cover transition duration-500 group-hover:scale-[1.02]"
                   />

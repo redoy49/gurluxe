@@ -30,15 +30,19 @@ export default function ProductForm({
       comparePrice: product?.comparePrice || "",
       shortDescription: product?.shortDescription || "",
       description: product?.description || "",
+
       category: product?.category || {
         name: "Sling Bags",
         slug: "sling-bags",
       },
-      colors: product?.colors || "",
-      materials: product?.materials || "",
-      featured: product?.featured || false,
-      newArrival: product?.newArrival || false,
-      bestSeller: product?.bestSeller || false,
+
+      colors: product?.colors?.join(", ") || "",
+
+      materials: product?.materials?.join(", ") || "",
+
+      featured: product?.flags?.featured || false,
+      newArrival: product?.flags?.newArrival || false,
+      bestSeller: product?.flags?.bestSeller || false,
     },
   });
 
@@ -86,12 +90,6 @@ export default function ProductForm({
             placeholder="Eve Micro Bag"
             register={register("name")}
             error={errors.name?.message}
-          />
-          <Field
-            label="Slug"
-            placeholder="eve-micro-bag"
-            register={register("slug")}
-            error={errors.slug?.message}
           />
           <Field
             label="SKU"

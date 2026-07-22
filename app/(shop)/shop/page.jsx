@@ -1,15 +1,9 @@
 import Link from "next/link";
 import FilterSidebar from "@/components/FilterSidebar";
+import { getProducts } from "@/lib/queries/products";
 
-export default function ShopPage() {
-  const products = Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1,
-    slug: `premium-hand-bag-${i + 1}`,
-    name: "Premium Hand Bag",
-    price: "৳ 2,499",
-    oldPrice: "৳ 3,499",
-    image: `https://picsum.photos/500/700?random=${i + 1}`,
-  }));
+export default async function ShopPage() {
+  const products = await getProducts();
 
   return (
     <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
@@ -38,25 +32,25 @@ export default function ShopPage() {
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {products.map((product) => (
             <Link
-              key={product.id}
+              key={product._id}
               href={`/shop/${product.slug}`}
               className="group"
             >
               {/* Image */}
               <div className="relative overflow-hidden rounded-lg bg-gray-100">
                 <img
-                  src={product.image}
-                  alt={product.name}
+                  src={product.images[0]?.url}
+                  alt={product.images[0]?.alt || product.name}
                   className="aspect-[5/6.5] w-full object-cover transition duration-500 group-hover:scale-105"
                 />
 
                 {/* Wishlist */}
                 <button
-  type="button"
-  className="absolute right-3 top-3 rounded-full bg-white/90 p-2 shadow-sm"
->
-  ♡
-</button>
+                  type="button"
+                  className="absolute right-3 top-3 rounded-full bg-white/90 p-2 shadow-sm"
+                >
+                  ♡
+                </button>
               </div>
 
               {/* Content */}
@@ -67,12 +61,14 @@ export default function ShopPage() {
 
                 <div className="mt-2 flex items-center gap-2">
                   <span className="font-sans text-sm font-semibold text-black">
-                    {product.price}
+                    ৳ {product.price}
                   </span>
 
-                  <span className="font-sans text-sm text-gray-400 line-through">
-                    {product.oldPrice}
-                  </span>
+                  {product.comparePrice > 0 && (
+                    <span className="font-sans text-sm text-gray-400 line-through">
+                      ৳ {product.comparePrice}
+                    </span>
+                  )}
                 </div>
               </div>
             </Link>
