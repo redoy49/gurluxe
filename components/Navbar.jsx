@@ -57,7 +57,7 @@ export default function Navbar() {
 
             <li>
               <Link
-                href="/new-arrivals"
+                href="/products/new-arrivals"
                 className="text-sm font-medium text-gray-700 transition hover:text-pink-500"
               >
                 New Arrivals

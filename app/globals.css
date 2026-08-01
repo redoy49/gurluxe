@@ -10,8 +10,7 @@
   --color-foreground: var(--foreground);
 
   /* Fonts */
-  --font-sans: var(--font-playfair-display);
-  --font-mono: var(--font-dm-mono);
+  --font-sans: var(--font-poppins);
 }
 
 @media (prefers-color-scheme: dark) {
