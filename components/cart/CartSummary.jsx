@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function CartSummary({ cartItems }) {
   const subtotal = cartItems.reduce(
@@ -77,13 +78,13 @@ export default function CartSummary({ cartItems }) {
       </div>
 
       {/* Checkout */}
-      <button
-        type="button"
+      <Link
+        href="/checkout"
         className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-black text-xs font-medium text-white transition hover:bg-[#2b1d28]"
       >
         Proceed to Checkout
         <ArrowRight size={16} strokeWidth={2} />
-      </button>
+      </Link>
 
       {/* Continue Shopping */}
       <button
