@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { productSchema } from "@/lib/validations/product.schema";
 
 export default function ProductForm({
@@ -69,12 +70,12 @@ export default function ProductForm({
       const result = await action(formData);
 
       if (result.success) {
-        alert(result.message);
+        toast.success(result.message);
         if (!product) {
           reset();
         }
       } else {
-        alert(result.message);
+        toast.error(result.message);
       }
     });
   };

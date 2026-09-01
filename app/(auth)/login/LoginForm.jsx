@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 import { loginSchema } from "@/lib/validations/auth.schema";
 import { loginUser } from "./actions";
@@ -26,10 +27,11 @@ export default function LoginForm() {
     startTransition(async () => {
       const res = await loginUser(data);
 
-      alert(res.message);
-
       if (res.success) {
+        toast.success(res.message);
         reset();
+      } else {
+        toast.error(res.message);
       }
     });
   };

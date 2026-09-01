@@ -2,21 +2,35 @@
 
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { deleteProduct } from "@/app/(dashboard)/dashboard/products/action";
 
 export default function DeleteProductButton({ id }) {
   const router = useRouter();
 
-  async function handleDelete() {
-    if (!window.confirm("Delete this product?")) return;
-
+  async function confirmDelete() {
     const result = await deleteProduct(id);
 
     if (result.success) {
+      toast.success(result.message);
       router.refresh();
     } else {
-      alert(result.message);
+      toast.error(result.message);
     }
+  }
+
+  function handleDelete() {
+    // Ask for confirmation via an action toast instead of window.confirm
+    toast("Delete this product?", {
+      description: "This action cannot be undone.",
+      action: {
+        label: "Delete",
+        onClick: confirmDelete,
+      },
+      cancel: {
+        label: "Cancel",
+      },
+    });
   }
 
   return (
