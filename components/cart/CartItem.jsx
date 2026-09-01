@@ -1,39 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import QuantitySelector from "./QuantitySelector";
+import { useCart } from "./CartProvider";
+import { normalizeColor } from "@/lib/utils/normalizeColor";
 
 export default function CartItem({ cartItems }) {
-  const [items, setItems] = useState(cartItems);
+  const { updateQuantity, removeItem } = useCart();
 
-  const increaseQuantity = (id) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
-      ),
-    );
-  };
-
-  const decreaseQuantity = (id) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              quantity: Math.max(1, item.quantity - 1),
-            }
-          : item,
-      ),
-    );
-  };
-
-  const removeItem = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  if (items.length === 0) {
+  if (cartItems.length === 0) {
     return (
       <div className="flex h-[400px] items-center justify-center rounded-2xl border border-gray-200">
         <div className="text-center">
@@ -67,9 +43,13 @@ export default function CartItem({ cartItems }) {
       </div>
 
       <div>
-        {items.map((item) => (
+        {cartItems.map((item) => {
+          // Some legacy cart items stored color as a { name, code } object
+          const colorLabel = normalizeColor(item.color).label;
+
+          return (
           <div
-            key={item.id}
+            key={item.itemId}
             className="border-b border-gray-100 py-6 lg:grid lg:grid-cols-12 lg:items-center"
           >
             {/* Product */}
@@ -95,10 +75,19 @@ export default function CartItem({ cartItems }) {
 
                 <p className="text-[11px] text-gray-400">SKU: {item.sku}</p>
 
-                <p className="text-[11px] text-gray-500">
-                  Color:
-                  <span className="ml-1 text-gray-900">{item.color}</span>
-                </p>
+                {colorLabel && (
+                  <p className="text-[11px] text-gray-500">
+                    Color:
+                    <span className="ml-1 text-gray-900">{colorLabel}</span>
+                  </p>
+                )}
+
+                {item.size && (
+                  <p className="text-[11px] text-gray-500">
+                    Size:
+                    <span className="ml-1 text-gray-900">{item.size}</span>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -113,8 +102,12 @@ export default function CartItem({ cartItems }) {
             <div className="col-span-3 mt-4 lg:mt-0">
               <QuantitySelector
                 quantity={item.quantity}
-                onDecrease={() => decreaseQuantity(item.id)}
-                onIncrease={() => increaseQuantity(item.id)}
+                onDecrease={() =>
+                  updateQuantity(item.itemId, item.quantity - 1)
+                }
+                onIncrease={() =>
+                  updateQuantity(item.itemId, item.quantity + 1)
+                }
               />
             </div>
 
@@ -126,7 +119,7 @@ export default function CartItem({ cartItems }) {
 
               <button
                 type="button"
-                onClick={() => removeItem(item.id)}
+                onClick={() => removeItem(item.itemId)}
                 aria-label="Remove item"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-500 transition hover:border-red-400 hover:bg-red-50 hover:text-red-500"
               >
@@ -134,7 +127,8 @@ export default function CartItem({ cartItems }) {
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

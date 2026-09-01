@@ -1,8 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { normalizeColor } from "@/lib/utils/normalizeColor";
 
-export default function ProductOptions({ product, updateQty }) {
+const BANGLA_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+
+function toBanglaDigits(number) {
+  return number
+    .toString()
+    .split("")
+    .map((digit) => BANGLA_DIGITS[digit] ?? digit)
+    .join("");
+}
+
+export default function ProductOptions({
+  product,
+  selectedColor,
+  onColorChange,
+  selectedSize,
+  onSizeChange,
+  quantity,
+  updateQty,
+}) {
+  // Colors are usually plain strings, but some products store { name, code } objects
   const colors = Array.isArray(product?.colors)
     ? product.colors
     : product?.colors
@@ -17,35 +36,33 @@ export default function ProductOptions({ product, updateQty }) {
 
   const maxQty = product?.stock > 0 ? product.stock : 1;
 
-  const [selectedColor, setSelectedColor] = useState(colors[0]?.code || null);
-  const [selectedSize, setSelectedSize] = useState(sizes[0] || null);
-
   return (
     // প্রডাক্ট সিলেক্টর অপশনস
     <div className="space-y-3.5 pt-1">
       {/* পছন্দের কালার নির্বাচন */}
       {colors.length > 0 && (
         <div className="flex items-center gap-3">
-          <span className="text-sm font-bold text-slate-800 min-w-[60px]">
+          <span className="text-sm font-bold text-slate-800 min-w-15">
             কালার:
           </span>
 
           <div className="flex items-center gap-2 flex-wrap">
             {colors.map((color) => {
-              const isActive = selectedColor === color.code;
+              const { label, swatch } = normalizeColor(color);
+              const isActive = selectedColor === label;
 
               return (
                 <button
-                  key={color.code}
+                  key={label}
                   type="button"
-                  onClick={() => setSelectedColor(color.code)}
+                  onClick={() => onColorChange(label)}
                   className={`color-btn w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                     isActive
                       ? "border-2 border-white ring-2 ring-pink-600 shadow-xs"
                       : "border border-slate-200/80 hover:scale-105 shadow-2xs"
                   }`}
-                  style={{ backgroundColor: color.code }}
-                  title={color.name}
+                  style={{ backgroundColor: swatch }}
+                  title={label}
                 >
                   {isActive && (
                     <i className="fa-solid fa-check text-white text-[9px]"></i>
@@ -60,7 +77,7 @@ export default function ProductOptions({ product, updateQty }) {
       {/* সাইজ নির্বাচন */}
       {sizes.length > 0 && (
         <div className="flex items-center gap-3">
-          <span className="text-sm font-bold text-slate-800 min-w-[60px]">
+          <span className="text-sm font-bold text-slate-800 min-w-15">
             সাইজ:
           </span>
 
@@ -72,7 +89,7 @@ export default function ProductOptions({ product, updateQty }) {
                 <button
                   key={size}
                   type="button"
-                  onClick={() => setSelectedSize(size)}
+                  onClick={() => onSizeChange(size)}
                   className={`size-btn w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center transition-all cursor-pointer font-en shrink-0 ${
                     isActive
                       ? "border-2 border-white ring-2 ring-pink-600 bg-pink-50 text-pink-600 shadow-xs"
@@ -89,7 +106,7 @@ export default function ProductOptions({ product, updateQty }) {
 
       {/* পরিমাণ */}
       <div className="flex items-center gap-3">
-        <span className="text-sm font-bold text-slate-800 min-w-[60px]">
+        <span className="text-sm font-bold text-slate-800 min-w-15">
           পরিমাণ:
         </span>
 
@@ -103,11 +120,8 @@ export default function ProductOptions({ product, updateQty }) {
             <i className="fa-solid fa-minus"></i>
           </button>
 
-          <span
-            id="productQty"
-            className="text-xs font-extrabold text-slate-900 font-en px-2.5 min-w-[24px] text-center"
-          >
-            ১
+          <span className="text-xs font-extrabold text-slate-900 font-en px-2.5 min-w-[24px] text-center">
+            {toBanglaDigits(quantity)}
           </span>
 
           <button

@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { toast } from "sonner";
+import { useCart } from "@/components/cart/CartProvider";
+import { normalizeColor } from "@/lib/utils/normalizeColor";
 import Breadcrumb from "./Breadcrumb";
 import ProductGallery from "./ProductGallery";
 import ProductSummary from "./ProductSummary";
@@ -11,10 +14,6 @@ import ProductTabs from "./ProductTabs";
 import MobileStickyBar from "./MobileStickyBar";
 import FloatingWhatsApp from "./FloatingWhatsApp";
 
-// জাভাস্ক্রিপ্ট লজিক
-let currentQty = 1;
-let cartItemsCount = 2;
-
 // ছবির থাম্বনেইল পরিবর্তন
 function changeImage(src, btnElement) {
   document.getElementById("mainProductImage").src = src;
@@ -24,47 +23,6 @@ function changeImage(src, btnElement) {
   });
   btnElement.classList.remove("border-transparent");
   btnElement.classList.add("border-pink-600");
-}
-
-// পরিমাণ পরিবর্তন
-function updateQty(change, maxQty = Infinity) {
-  currentQty += change;
-  if (currentQty < 1) currentQty = 1;
-  if (currentQty > maxQty) currentQty = maxQty;
-
-  const banglaNums = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-  const convertedQty = currentQty
-    .toString()
-    .split("")
-    .map((digit) => banglaNums[parseInt(digit)] || digit)
-    .join("");
-
-  document.getElementById("productQty").innerText = convertedQty;
-}
-
-// কার্টে যোগ করা
-function addToCart() {
-  cartItemsCount += currentQty;
-  const cartBadge = document.getElementById("headerCartBadge");
-  if (cartBadge) {
-    const banglaNums = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-    cartBadge.innerText = cartItemsCount
-      .toString()
-      .split("")
-      .map((digit) => banglaNums[parseInt(digit)] || digit)
-      .join("");
-  }
-
-  toast.success("কার্টে যোগ করা হয়েছে!", {
-    description: `আপনি ${currentQty} টি ব্যাগ কার্টে যোগ করেছেন।`,
-  });
-}
-
-// বাই নাও
-function buyNow() {
-  toast.info("অর্ডার পপআপ", {
-    description: "খুব শীঘ্রই চেকআউট পেজে রিডাইরেক্ট করা হবে।",
-  });
 }
 
 // ট্যাব সুইচিং লজিক
@@ -90,6 +48,42 @@ function switchTab(tabId) {
 
 export default function ProductPage({ product }) {
   const inStock = (product?.stock || 0) > 0;
+  const maxQty = inStock ? product.stock : 1;
+
+  const [quantity, setQuantity] = useState(1);
+  const [selectedColor, setSelectedColor] = useState(
+    normalizeColor(product?.colors?.[0]).label || null,
+  );
+  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || null);
+
+  const { addItem } = useCart();
+
+  // পরিমাণ পরিবর্তন
+  function updateQty(change, max = maxQty) {
+    setQuantity((qty) => Math.min(max, Math.max(1, qty + change)));
+  }
+
+  // কার্টে যোগ করা
+  function addToCart() {
+    addItem({
+      productId: product._id,
+      slug: product.slug,
+      name: product.name,
+      sku: product.sku,
+      image: product.images?.[0]?.url || "",
+      color: selectedColor,
+      size: selectedSize,
+      price: product.price,
+      quantity,
+    });
+  }
+
+  // বাই নাও
+  function buyNow() {
+    toast.info("অর্ডার পপআপ", {
+      description: "খুব শীঘ্রই চেকআউট পেজে রিডাইরেক্ট করা হবে।",
+    });
+  }
 
   return (
     <>
@@ -105,7 +99,15 @@ export default function ProductPage({ product }) {
           <div className="lg:col-span-6 flex flex-col justify-start space-y-5">
             <div className="space-y-4">
               <ProductSummary product={product} />
-              <ProductOptions product={product} updateQty={updateQty} />
+              <ProductOptions
+                product={product}
+                selectedColor={selectedColor}
+                onColorChange={setSelectedColor}
+                selectedSize={selectedSize}
+                onSizeChange={setSelectedSize}
+                quantity={quantity}
+                updateQty={updateQty}
+              />
               <ProductActions
                 addToCart={addToCart}
                 buyNow={buyNow}
@@ -121,7 +123,11 @@ export default function ProductPage({ product }) {
       </main>
 
       {/* মোবাইল ডিভাইসের জন্য ফিক্সড বাটন বার (Sticky Bottom Bar) */}
-      <MobileStickyBar />
+      <MobileStickyBar
+        addToCart={addToCart}
+        buyNow={buyNow}
+        inStock={inStock}
+      />
 
       <FloatingWhatsApp />
     </>

@@ -7,13 +7,14 @@ import { FiUser } from "react-icons/fi";
 import { IoBagHandleOutline, IoChevronBackOutline } from "react-icons/io5";
 import { ChevronRight } from "lucide-react";
 import { RiMenu3Line } from "react-icons/ri";
+import { useCart } from "@/components/cart/CartProvider";
 
 export default function Navbar() {
   const [visible, setVisible] = useState(false);
+  const { itemCount } = useCart();
 
-  // Replace with your auth/cart state later
+  // Replace with your auth state later
   const token = false;
-  const cartCount = 2;
 
   return (
     <>
@@ -141,7 +142,7 @@ export default function Navbar() {
               />
 
               <span className="absolute -bottom-2 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-linear-to-r from-pink-500 to-rose-500 text-[11px] font-semibold text-white text-center leading-4 aspect-square">
-                {cartCount}
+                {itemCount}
               </span>
             </Link>
 

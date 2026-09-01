@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function MobileStickyBar() {
+export default function MobileStickyBar({ addToCart, buyNow, inStock }) {
   const [showSticky, setShowSticky] = useState(false);
 
   useEffect(() => {
@@ -26,7 +26,9 @@ export default function MobileStickyBar() {
       <div className="max-w-md mx-auto flex items-center gap-2.5">
         <button
           type="button"
-          className="flex-1 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white font-bold h-10 px-3 rounded-full text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+          disabled={!inStock}
+          onClick={addToCart}
+          className="flex-1 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white font-bold h-10 px-3 rounded-full text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <i className="fa-solid fa-cart-shopping text-sm"></i>
           <span className="whitespace-nowrap">Add to Cart</span>
@@ -34,7 +36,9 @@ export default function MobileStickyBar() {
 
         <button
           type="button"
-          className="flex-1 bg-pink-600 hover:bg-pink-700 active:scale-[0.98] text-white font-bold h-10 px-3 rounded-full text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-pink-200"
+          disabled={!inStock}
+          onClick={buyNow}
+          className="flex-1 bg-pink-600 hover:bg-pink-700 active:scale-[0.98] text-white font-bold h-10 px-3 rounded-full text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-pink-200 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <i className="fa-solid fa-bolt text-sm"></i>
           <span className="whitespace-nowrap">Buy Now</span>
