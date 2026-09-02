@@ -6,13 +6,31 @@ import { dbConnect } from "@/lib/mongoDb";
 import { uploadToCloudinary } from "@/lib/cloudinary/upload";
 import { deleteFromCloudinary } from "@/lib/cloudinary/destroy";
 import { generateSlug } from "@/lib/utils/generateSlug";
+import { productSchema } from "@/lib/validations/product.schema";
 
 export async function addProduct(formData) {
   try {
     const db = await dbConnect();
 
-    const productData = JSON.parse(formData.get("product"));
+    const rawProductData = JSON.parse(formData.get("product"));
+    const parsed = productSchema.safeParse(rawProductData);
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        message: parsed.error.issues[0]?.message || "Invalid product data",
+      };
+    }
+
+    const productData = parsed.data;
     const files = formData.getAll("images");
+
+    if (files.length === 0) {
+      return {
+        success: false,
+        message: "At least one product image is required",
+      };
+    }
 
     const uploadedImages = [];
 
@@ -29,38 +47,33 @@ export async function addProduct(formData) {
       slug: generateSlug(productData.name),
       sku: productData.sku,
 
-      category: {
-        name: productData.category.name,
-        slug: productData.category.slug,
-      },
+      category: productData.category,
 
       images: uploadedImages,
       videos: [],
 
-      price: Number(productData.price),
-      comparePrice: Number(productData.comparePrice) || 0,
-      stock: Number(productData.stock),
+      price: productData.price,
+      comparePrice: productData.comparePrice,
+      stock: productData.stock,
 
-      soldCount: 0,
+      soldCount: productData.soldCount,
+
+      sizes: productData.sizes,
 
       flags: {
-        featured: productData.featured || false,
-        newArrival: productData.newArrival || false,
-        bestSeller: productData.bestSeller || false,
+        featured: productData.featured,
+        newArrival: productData.newArrival,
+        bestSeller: productData.bestSeller,
       },
 
-      status: "active",
+      status: productData.status,
 
       shortDescription: productData.shortDescription,
       description: productData.description,
 
-      colors: productData.colors
-        ? productData.colors.split(",").map((color) => color.trim())
-        : [],
+      colors: productData.colors,
 
-      materials: productData.materials
-        ? productData.materials.split(",").map((material) => material.trim())
-        : [],
+      materials: productData.materials,
 
       rating: {
         average: 0,
@@ -122,51 +135,69 @@ export async function updateProduct(formData) {
     const db = await dbConnect();
 
     const id = formData.get("_id");
-    const updateData = JSON.parse(formData.get("product"));
+    const rawUpdateData = JSON.parse(formData.get("product"));
+    const parsed = productSchema.safeParse(rawUpdateData);
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        message: parsed.error.issues[0]?.message || "Invalid product data",
+      };
+    }
+
+    const updateData = parsed.data;
+    const files = formData.getAll("images");
+
+    // Only upload/append images when new files were actually selected,
+    // leaving the existing images array untouched otherwise.
+    const newImages = [];
+    for (const file of files) {
+      const image = await uploadToCloudinary(file);
+      if (image) newImages.push(image);
+    }
 
     const product = {
       name: updateData.name,
       slug: generateSlug(updateData.name),
       sku: updateData.sku,
 
-      category: {
-        name: updateData.category.name,
-        slug: updateData.category.slug,
-      },
+      category: updateData.category,
 
-      price: Number(updateData.price),
-      comparePrice: Number(updateData.comparePrice) || 0,
-      stock: Number(updateData.stock),
+      price: updateData.price,
+      comparePrice: updateData.comparePrice,
+      stock: updateData.stock,
+      soldCount: updateData.soldCount,
+
+      sizes: updateData.sizes,
 
       flags: {
-        featured: updateData.featured || false,
-        newArrival: updateData.newArrival || false,
-        bestSeller: updateData.bestSeller || false,
+        featured: updateData.featured,
+        newArrival: updateData.newArrival,
+        bestSeller: updateData.bestSeller,
       },
 
-      status: "active",
+      status: updateData.status,
 
       shortDescription: updateData.shortDescription,
       description: updateData.description,
 
-      colors: updateData.colors
-        ? updateData.colors.split(",").map((color) => color.trim())
-        : [],
+      colors: updateData.colors,
 
-      materials: updateData.materials
-        ? updateData.materials.split(",").map((material) => material.trim())
-        : [],
+      materials: updateData.materials,
 
       updatedAt: new Date(),
     };
+
+    const update = { $set: product };
+    if (newImages.length) {
+      update.$push = { images: { $each: newImages } };
+    }
 
     await db.collection("products").updateOne(
       {
         _id: new ObjectId(id),
       },
-      {
-        $set: product,
-      },
+      update,
     );
 
     revalidatePath("/dashboard/products");
