@@ -16,18 +16,10 @@ import {
 } from "lucide-react";
 import { productSchema } from "@/lib/validations/product.schema";
 import { generateSlug } from "@/lib/utils/generateSlug";
+import { CATEGORIES } from "@/lib/constants/categories";
 import ColorsInput from "./product-form/ColorsInput";
 import SizesInput from "./product-form/SizesInput";
 import ImagesInput from "./product-form/ImagesInput";
-
-const CATEGORIES = [
-  "Sling Bags",
-  "Tote Bags",
-  "Clutches",
-  "Satchel Bags",
-  "Crossbody Bags",
-  "Hand Bags",
-];
 
 export default function ProductForm({
   product,
@@ -147,7 +139,7 @@ export default function ProductForm({
                 slug: generateSlug(categoryOptionName),
               });
             }}
-            options={CATEGORIES}
+            options={CATEGORIES.map((c) => c.name)}
           />
 
           <Select

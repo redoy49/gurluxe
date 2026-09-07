@@ -1,11 +1,20 @@
 import Link from "next/link";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { getProducts } from "@/lib/queries/products";
 import Image from "next/image";
 import DeleteProductButton from "@/components/dashboard/DeleteProductButton";
 
-export default async function ProductsPage() {
-  const products = await getProducts();
+export default async function ProductsPage({ searchParams }) {
+  const { category } = await searchParams;
+  const allProducts = await getProducts();
+
+  const products = category
+    ? allProducts.filter((p) => p.category?.slug === category)
+    : allProducts;
+
+  const categoryName = category
+    ? (products[0]?.category?.name ?? category)
+    : null;
 
   return (
     <div>
@@ -26,6 +35,22 @@ export default async function ProductsPage() {
           Add Product
         </Link>
       </div>
+
+      {category && (
+        <div className="mb-4 flex items-center gap-2">
+          <span className="text-sm text-gray-500">Filtering by:</span>
+          <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 py-1 pl-3 pr-1 text-sm font-medium text-gray-700">
+            {categoryName}
+            <Link
+              href="/dashboard/products"
+              className="rounded-full p-1 text-gray-400 transition hover:bg-gray-200 hover:text-gray-700"
+              aria-label="Clear category filter"
+            >
+              <X size={14} />
+            </Link>
+          </span>
+        </div>
+      )}
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
@@ -150,7 +175,9 @@ export default async function ProductsPage() {
                     colSpan={6}
                     className="px-6 py-16 text-center text-gray-500"
                   >
-                    No products found.
+                    {category
+                      ? "No products in this category yet."
+                      : "No products found."}
                   </td>
                 </tr>
               )}

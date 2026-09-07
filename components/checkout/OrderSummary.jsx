@@ -8,6 +8,7 @@ export default function OrderSummary({
   shipping = 60,
   discount = 0,
   onPlaceOrder,
+  isPlacing = false,
 }) {
   const subtotal = cartItems.reduce(
     (total, item) =>
@@ -35,7 +36,7 @@ export default function OrderSummary({
       <div className="mt-6 space-y-4">
         {cartItems.map((item) => (
           <div
-            key={item.id}
+            key={item.itemId}
             className="flex items-center gap-3"
           >
             {/* Image */}
@@ -146,9 +147,10 @@ export default function OrderSummary({
       <button
         type="button"
         onClick={onPlaceOrder}
-        className="mt-6 flex h-14 w-full items-center justify-center rounded-full bg-black text-xs font-medium text-white transition hover:bg-[#2b1d28]"
+        disabled={isPlacing}
+        className="mt-6 flex h-14 w-full items-center justify-center rounded-full bg-black text-xs font-medium text-white transition hover:bg-[#2b1d28] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Place Order
+        {isPlacing ? "Placing Order..." : "Place Order"}
       </button>
 
 
