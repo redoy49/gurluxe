@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { dbConnect } from "@/lib/mongoDb";
 import { getCurrentCart } from "@/lib/queries/cart";
 import { getStoreSettings } from "@/lib/queries/settings";
+import { validateCouponForOrder } from "@/lib/queries/coupons";
 import { placeOrderSchema } from "@/lib/validations/order.schema";
 
 function generateOrderNumber() {
@@ -13,8 +14,36 @@ function generateOrderNumber() {
   return `GRX-${stamp}${random}`;
 }
 
-// No coupon system exists yet, so discounts always come out to 0 — this
-// stays real rather than faking a promo the storefront can't actually apply.
+// Live preview used by the coupon input at checkout — recomputed
+// authoritatively again inside placeOrder, so this is just UX feedback and
+// is never trusted as the final discount.
+export async function applyCoupon(code) {
+  try {
+    const cart = await getCurrentCart();
+    const subtotal = cart.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+
+    const result = await validateCouponForOrder(code, subtotal);
+
+    if (!result.valid) {
+      return { success: false, message: result.message };
+    }
+
+    return {
+      success: true,
+      code: result.coupon.code,
+      discount: result.discount,
+      message: `Coupon applied — ৳ ${result.discount.toLocaleString()} off`,
+    };
+  } catch (error) {
+    console.error("APPLY COUPON ERROR:", error);
+
+    return { success: false, message: "Failed to apply coupon" };
+  }
+}
+
 export async function placeOrder(input) {
   try {
     const parsed = placeOrderSchema.safeParse(input);
@@ -26,7 +55,8 @@ export async function placeOrder(input) {
       };
     }
 
-    const { customer, payment } = parsed.data;
+    const { customer, payment, couponCode, transactionId, senderNumber } =
+      parsed.data;
 
     const cart = await getCurrentCart();
 
@@ -36,6 +66,14 @@ export async function placeOrder(input) {
 
     const db = await dbConnect();
     const settings = await getStoreSettings();
+
+    if (payment === "cod" && !settings.codEnabled) {
+      return { success: false, message: "Cash on Delivery is not available" };
+    }
+
+    if (payment !== "cod" && !settings[`${payment}Number`]) {
+      return { success: false, message: "This payment method is not available" };
+    }
 
     const subtotal = cart.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -52,17 +90,42 @@ export async function placeOrder(input) {
         ? settings.shippingInsideDhaka
         : settings.shippingOutsideDhaka;
 
-    const discount = 0;
+    // Never trust a client-supplied discount amount — re-validate the code
+    // against the real subtotal right here, at the moment of purchase.
+    let discount = 0;
+    let appliedCoupon = null;
+
+    if (couponCode) {
+      const couponResult = await validateCouponForOrder(couponCode, subtotal);
+
+      if (!couponResult.valid) {
+        return { success: false, message: couponResult.message };
+      }
+
+      discount = couponResult.discount;
+      appliedCoupon = couponResult.coupon;
+    }
+
     const total = subtotal + shipping - discount;
 
     const orderNumber = generateOrderNumber();
+    const now = new Date();
+
+    // COD is settled at delivery; every other method is a manual mobile
+    // banking transfer that needs a human to check the transaction id
+    // against what actually landed in the merchant account.
+    const paymentStatus = payment === "cod" ? "unpaid" : "pending_verification";
 
     const order = {
       orderNumber,
       customer,
       payment: {
         method: payment,
-        status: "unpaid",
+        status: paymentStatus,
+        transactionId: payment === "cod" ? null : transactionId,
+        senderNumber: payment === "cod" ? null : senderNumber,
+        verifiedAt: null,
+        refundedAt: null,
       },
       items: cart.items.map((item) => ({
         productId: item.productId,
@@ -76,12 +139,21 @@ export async function placeOrder(input) {
         quantity: item.quantity,
       })),
       amounts: { subtotal, shipping, discount, total },
+      couponCode: appliedCoupon?.code || null,
       status: "pending",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      statusHistory: [{ status: "pending", at: now }],
+      tracking: { courier: null, trackingNumber: null },
+      createdAt: now,
+      updatedAt: now,
     };
 
     await db.collection("orders").insertOne(order);
+
+    if (appliedCoupon) {
+      await db
+        .collection("coupons")
+        .updateOne({ _id: new ObjectId(appliedCoupon._id) }, { $inc: { usedCount: 1 } });
+    }
 
     // Reflect the sale in inventory: decrement stock (floored at 0), bump soldCount.
     const soldByProduct = new Map();
@@ -141,6 +213,7 @@ export async function placeOrder(input) {
     revalidatePath("/dashboard/orders");
     revalidatePath("/dashboard/products");
     revalidatePath("/dashboard/customers");
+    revalidatePath("/dashboard/coupons");
 
     return { success: true, orderNumber };
   } catch (error) {

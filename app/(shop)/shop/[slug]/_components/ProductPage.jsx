@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/components/cart/CartProvider";
 import { normalizeColor } from "@/lib/utils/normalizeColor";
 import Breadcrumb from "./Breadcrumb";
@@ -57,15 +57,15 @@ export default function ProductPage({ product }) {
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || null);
 
   const { addItem } = useCart();
+  const router = useRouter();
 
   // পরিমাণ পরিবর্তন
   function updateQty(change, max = maxQty) {
     setQuantity((qty) => Math.min(max, Math.max(1, qty + change)));
   }
 
-  // কার্টে যোগ করা
-  function addToCart() {
-    addItem({
+  function buildCartItem() {
+    return {
       productId: product._id,
       slug: product.slug,
       name: product.name,
@@ -75,14 +75,21 @@ export default function ProductPage({ product }) {
       size: selectedSize,
       price: product.price,
       quantity,
-    });
+    };
   }
 
-  // বাই নাও
-  function buyNow() {
-    toast.info("অর্ডার পপআপ", {
-      description: "খুব শীঘ্রই চেকআউট পেজে রিডাইরেক্ট করা হবে।",
-    });
+  // কার্টে যোগ করা
+  function addToCart() {
+    addItem(buildCartItem());
+  }
+
+  // বাই নাও: কার্টে যোগ করে সরাসরি চেকআউটে নিয়ে যাওয়া
+  async function buyNow() {
+    const result = await addItem(buildCartItem());
+
+    if (result?.success) {
+      router.push("/checkout");
+    }
   }
 
   return (

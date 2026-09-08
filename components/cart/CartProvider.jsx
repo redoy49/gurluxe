@@ -18,16 +18,23 @@ export function CartProvider({ initialCart, children }) {
 
   const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 
+  // Returns the result so callers that need to act after the item lands in
+  // the cart (e.g. "Buy Now" redirecting to checkout) can await it; plain
+  // "Add to Cart" buttons can just call it and ignore the return value.
   function addItem(item) {
-    startTransition(async () => {
-      const result = await addToCart(item);
+    return new Promise((resolve) => {
+      startTransition(async () => {
+        const result = await addToCart(item);
 
-      if (result.success) {
-        setCart(result.cart);
-        toast.success(result.message);
-      } else {
-        toast.error(result.message);
-      }
+        if (result.success) {
+          setCart(result.cart);
+          toast.success(result.message);
+        } else {
+          toast.error(result.message);
+        }
+
+        resolve(result);
+      });
     });
   }
 

@@ -4,8 +4,14 @@ import { revalidatePath } from "next/cache";
 import { dbConnect } from "@/lib/mongoDb";
 import { settingsSchema } from "@/lib/validations/settings.schema";
 import { SETTINGS_DOC_ID } from "@/lib/queries/settings";
+import { requireAdminAction } from "@/lib/auth/authorize";
 
 export async function updateStoreSettings(rawData) {
+  const { authorized } = await requireAdminAction();
+  if (!authorized) {
+    return { success: false, message: "Forbidden: admin access required." };
+  }
+
   try {
     const parsed = settingsSchema.safeParse(rawData);
 

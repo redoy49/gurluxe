@@ -3,6 +3,7 @@
 import hashedPassword from "@/app/utils/hashPassword";
 import { dbConnect } from "@/lib/mongoDb";
 import { registerSchema } from "@/lib/validations/auth.schema";
+import { resolveInitialRole } from "@/lib/auth/authorize";
 
 export async function registerUser(data) {
   const result = registerSchema.safeParse(data);
@@ -38,6 +39,8 @@ export async function registerUser(data) {
       name,
       email,
       password: passwordHash,
+      provider: "credentials",
+      role: resolveInitialRole(email),
       createdAt: new Date(),
     });
 

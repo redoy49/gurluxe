@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -10,9 +11,33 @@ import { toast } from "sonner";
 import { loginSchema } from "@/lib/validations/auth.schema";
 import { loginUser } from "./actions";
 
+const OAUTH_ERROR_MESSAGES = {
+  google_denied: "Google sign-in was cancelled.",
+  google_state_mismatch: "Google sign-in session expired. Please try again.",
+  google_auth_failed: "Google sign-in failed. Please try again.",
+  google_email_unverified: "Your Google email address isn't verified.",
+  google_not_configured: "Google sign-in isn't set up yet.",
+};
+
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Only follow "from" when it's an internal path, to avoid an open redirect.
+  const from = searchParams.get("from");
+  const safeFrom =
+    from && from.startsWith("/") && !from.startsWith("//") ? from : null;
+  const googleHref = `/api/auth/google${safeFrom ? `?from=${encodeURIComponent(safeFrom)}` : ""}`;
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error) {
+      toast.error(OAUTH_ERROR_MESSAGES[error] || "Sign-in failed. Please try again.");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     register,
@@ -30,6 +55,12 @@ export default function LoginForm() {
       if (res.success) {
         toast.success(res.message);
         reset();
+
+        const redirectTo =
+          safeFrom || (res.role === "admin" ? "/dashboard" : "/");
+
+        router.push(redirectTo);
+        router.refresh();
       } else {
         toast.error(res.message);
       }
@@ -55,14 +86,13 @@ export default function LoginForm() {
 
       {/* Social Buttons */}
       <div className="mt-8 space-y-3">
-        <button
-          type="button"
+        <a
+          href={googleHref}
           className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 transition hover:border-pink-300 hover:shadow-md"
         >
           <GoogleIcon />
           <span>Log in with Google</span>
-        </button>
-
+        </a>
         <button
           type="button"
           className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 transition hover:border-pink-300 hover:shadow-md"
@@ -193,7 +223,6 @@ function GoogleIcon() {
     </svg>
   );
 }
-
 function AppleIcon() {
   return (
     <svg
@@ -207,3 +236,4 @@ function AppleIcon() {
     </svg>
   );
 }
+

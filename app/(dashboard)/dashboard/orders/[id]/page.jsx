@@ -3,7 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getOrderById } from "@/lib/queries/orders";
-import OrderStatusControl from "@/components/dashboard/OrderStatusControl";
+import OrderStatusBadge from "@/components/dashboard/OrderStatusBadge";
+import PaymentStatusBadge from "@/components/dashboard/PaymentStatusBadge";
+import OrderActions from "@/components/dashboard/OrderActions";
+import OrderTimeline from "@/components/OrderTimeline";
 
 const PAYMENT_LABELS = {
   cod: "Cash on Delivery",
@@ -50,7 +53,20 @@ export default async function OrderDetailPage({ params }) {
           </p>
         </div>
 
-        <OrderStatusControl orderId={order._id} status={order.status} />
+        <div className="flex items-center gap-2">
+          <OrderStatusBadge status={order.status} />
+          <PaymentStatusBadge status={order.payment.status} />
+        </div>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
+        <h3 className="mb-4 font-semibold text-gray-900">Manage Order</h3>
+        <OrderActions
+          orderId={order._id}
+          status={order.status}
+          paymentStatus={order.payment.status}
+          paymentMethod={order.payment.method}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -110,7 +126,9 @@ export default async function OrderDetailPage({ params }) {
             </div>
             {order.amounts.discount > 0 && (
               <div className="flex justify-between text-green-600">
-                <span>Discount</span>
+                <span>
+                  Discount{order.couponCode ? ` (${order.couponCode})` : ""}
+                </span>
                 <span>- ৳ {order.amounts.discount.toLocaleString()}</span>
               </div>
             )}
@@ -118,6 +136,16 @@ export default async function OrderDetailPage({ params }) {
               <span>Total</span>
               <span>৳ {order.amounts.total.toLocaleString()}</span>
             </div>
+          </div>
+
+          {/* Order timeline */}
+          <div className="border-t border-gray-100 px-6 py-6">
+            <h3 className="mb-4 font-semibold text-gray-900">Order Timeline</h3>
+            <OrderTimeline
+              status={order.status}
+              statusHistory={order.statusHistory || []}
+              tracking={order.tracking}
+            />
           </div>
         </div>
 
@@ -167,12 +195,53 @@ export default async function OrderDetailPage({ params }) {
               </div>
               <div>
                 <dt className="text-xs text-gray-400">Status</dt>
-                <dd className="mt-0.5 font-medium capitalize text-gray-900">
-                  {order.payment.status}
+                <dd className="mt-0.5">
+                  <PaymentStatusBadge status={order.payment.status} />
                 </dd>
               </div>
+              {order.payment.transactionId && (
+                <div>
+                  <dt className="text-xs text-gray-400">Transaction ID</dt>
+                  <dd className="mt-0.5 font-mono font-medium text-gray-900">
+                    {order.payment.transactionId}
+                  </dd>
+                </div>
+              )}
+              {order.payment.senderNumber && (
+                <div>
+                  <dt className="text-xs text-gray-400">Sent From</dt>
+                  <dd className="mt-0.5 font-medium text-gray-900">
+                    {order.payment.senderNumber}
+                  </dd>
+                </div>
+              )}
+              {order.payment.verifiedAt && (
+                <div>
+                  <dt className="text-xs text-gray-400">Verified</dt>
+                  <dd className="mt-0.5 font-medium text-gray-900">
+                    {formatDate(order.payment.verifiedAt)}
+                  </dd>
+                </div>
+              )}
+              {order.payment.refundedAt && (
+                <div>
+                  <dt className="text-xs text-gray-400">Refunded</dt>
+                  <dd className="mt-0.5 font-medium text-gray-900">
+                    {formatDate(order.payment.refundedAt)}
+                  </dd>
+                </div>
+              )}
             </dl>
           </div>
+
+          {order.status === "cancelled" && order.cancelReason && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-6">
+              <h3 className="mb-2 font-semibold text-red-800">
+                Cancellation Reason
+              </h3>
+              <p className="text-sm text-red-700">{order.cancelReason}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

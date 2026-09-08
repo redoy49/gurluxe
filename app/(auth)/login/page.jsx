@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import LoginForm from "./LoginForm";
 
 export default function LoginPage() {
@@ -16,7 +17,9 @@ export default function LoginPage() {
       </div>
 
       <section className="relative z-10 flex min-h-screen items-center justify-center px-4">
-        <LoginForm />
+        <Suspense fallback={null}>
+          <LoginForm />
+        </Suspense>
       </section>
     </main>
   );

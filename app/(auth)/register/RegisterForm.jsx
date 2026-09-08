@@ -55,13 +55,13 @@ export default function RegisterForm() {
 
       {/* Social Buttons */}
       <div className="mt-8 space-y-3">
-        <button
-          type="button"
+        <a
+          href="/api/auth/google"
           className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 transition hover:border-pink-300 hover:shadow-md"
         >
           <GoogleIcon />
           <span>Create account with Google</span>
-        </button>
+        </a>
 
         <button
           type="button"
@@ -196,7 +196,6 @@ function GoogleIcon() {
     </svg>
   );
 }
-
 function AppleIcon() {
   return (
     <svg

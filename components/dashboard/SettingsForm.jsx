@@ -15,6 +15,10 @@ export default function SettingsForm({ settings }) {
     shippingOutsideDhaka: settings.shippingOutsideDhaka,
     freeShippingThreshold: settings.freeShippingThreshold,
     codEnabled: settings.codEnabled,
+    bkashNumber: settings.bkashNumber || "",
+    nagadNumber: settings.nagadNumber || "",
+    rocketNumber: settings.rocketNumber || "",
+    upayNumber: settings.upayNumber || "",
   });
   const [isPending, startTransition] = useTransition();
 
@@ -142,6 +146,48 @@ export default function SettingsForm({ settings }) {
             Cash on Delivery enabled
           </span>
         </label>
+
+        <div className="mt-6 border-t border-gray-100 pt-6">
+          <h3 className="text-sm font-medium text-gray-900">
+            Mobile Banking Numbers
+          </h3>
+          <p className="mt-1 text-xs text-gray-500">
+            No payment gateway is connected, so customers send money to these
+            numbers directly and submit the Transaction ID at checkout for
+            you to verify. Leave a number blank to hide that method.
+          </p>
+
+          <div className="mt-4 grid gap-6 md:grid-cols-2">
+            <Field
+              label="bKash Number"
+              name="bkashNumber"
+              value={form.bkashNumber}
+              onChange={handleChange}
+              placeholder="01XXXXXXXXX"
+            />
+            <Field
+              label="Nagad Number"
+              name="nagadNumber"
+              value={form.nagadNumber}
+              onChange={handleChange}
+              placeholder="01XXXXXXXXX"
+            />
+            <Field
+              label="Rocket Number"
+              name="rocketNumber"
+              value={form.rocketNumber}
+              onChange={handleChange}
+              placeholder="01XXXXXXXXX"
+            />
+            <Field
+              label="Upay Number"
+              name="upayNumber"
+              value={form.upayNumber}
+              onChange={handleChange}
+              placeholder="01XXXXXXXXX"
+            />
+          </div>
+        </div>
       </section>
 
       <div className="flex justify-end">

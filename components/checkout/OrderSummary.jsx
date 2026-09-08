@@ -2,11 +2,15 @@
 
 import Image from "next/image";
 import { ShieldCheck } from "lucide-react";
+import CouponInput from "./CouponInput";
 
 export default function OrderSummary({
   cartItems = [],
   shipping = 60,
   discount = 0,
+  coupon = null,
+  onApplyCoupon,
+  onRemoveCoupon,
   onPlaceOrder,
   isPlacing = false,
 }) {
@@ -74,6 +78,14 @@ export default function OrderSummary({
         ))}
       </div>
 
+      {/* Coupon */}
+      <div className="mt-6">
+        <CouponInput
+          applied={coupon}
+          onApply={onApplyCoupon}
+          onRemove={onRemoveCoupon}
+        />
+      </div>
 
       {/* Price Breakdown */}
       <div className="mt-6 space-y-4 border-y border-gray-100 py-5">

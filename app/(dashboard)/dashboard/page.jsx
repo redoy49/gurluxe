@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  Clock,
   Package,
   ShoppingCart,
   Sparkles,
@@ -23,6 +24,8 @@ function currency(value) {
 export default async function DashboardPage() {
   const {
     totals,
+    ordersByStatus,
+    paymentsAwaitingVerification,
     categoryDistribution,
     stockVsSold,
     lowStockProducts,
@@ -40,7 +43,19 @@ export default async function DashboardPage() {
       </p>
 
       {/* KPI cards */}
-      <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-5">
+        <Link
+          href="/dashboard/orders?status=pending"
+          className="block rounded-xl transition hover:-translate-y-0.5"
+        >
+          <StatCard
+            label="Pending Orders"
+            value={ordersByStatus.pending || 0}
+            sub="Awaiting your review"
+            icon={Clock}
+          />
+        </Link>
+
         <StatCard
           label="Total Products"
           value={totals.totalProducts}
@@ -68,6 +83,27 @@ export default async function DashboardPage() {
           icon={ShoppingCart}
         />
       </div>
+
+      {/* Payments awaiting manual verification */}
+      {paymentsAwaitingVerification > 0 && (
+        <Link
+          href="/dashboard/orders?status=pending"
+          className="mt-6 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 transition hover:border-blue-300"
+        >
+          <Clock className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
+          <div>
+            <p className="text-sm font-medium text-blue-800">
+              {paymentsAwaitingVerification} payment
+              {paymentsAwaitingVerification === 1 ? "" : "s"} awaiting
+              verification
+            </p>
+            <p className="mt-0.5 text-sm text-blue-700">
+              Mobile banking orders with a submitted transaction id — check
+              them against your merchant account and mark paid or failed.
+            </p>
+          </div>
+        </Link>
+      )}
 
       {/* Low stock alert */}
       {lowStockProducts.length > 0 && (

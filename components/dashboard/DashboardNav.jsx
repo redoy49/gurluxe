@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   Users,
   Settings,
+  Tag,
 } from "lucide-react";
 
 const menu = [
@@ -31,6 +32,11 @@ const menu = [
     name: "Orders",
     href: "/dashboard/orders",
     icon: ShoppingCart,
+  },
+  {
+    name: "Coupons",
+    href: "/dashboard/coupons",
+    icon: Tag,
   },
   {
     name: "Customers",

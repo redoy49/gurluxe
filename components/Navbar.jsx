@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { TbSearch } from "react-icons/tb";
 import { FiUser } from "react-icons/fi";
@@ -8,13 +9,24 @@ import { IoBagHandleOutline, IoChevronBackOutline } from "react-icons/io5";
 import { ChevronRight } from "lucide-react";
 import { RiMenu3Line } from "react-icons/ri";
 import { useCart } from "@/components/cart/CartProvider";
+import { logoutUser } from "@/app/(auth)/logout/actions";
 
-export default function Navbar() {
+export default function Navbar({ user }) {
   const [visible, setVisible] = useState(false);
   const { itemCount } = useCart();
 
-  // Replace with your auth state later
-  const token = false;
+  const isAuthenticated = Boolean(user);
+  const isAdmin = user?.role === "admin";
+  const mobileAccountHref = isAuthenticated
+    ? isAdmin
+      ? "/dashboard"
+      : "/profile"
+    : "/login";
+  const mobileAccountLabel = isAuthenticated
+    ? isAdmin
+      ? "Dashboard"
+      : "My Account"
+    : "Login";
 
   return (
     <>
@@ -87,16 +99,65 @@ export default function Navbar() {
 
             {/* User */}
             <div className="group relative hidden md:block">
-              <Link href={token ? "#" : "/login"}>
-                <FiUser
-                  size={22}
-                  className="cursor-pointer text-slate-600 transition hover:text-pink-500"
-                />
+              <Link href={isAuthenticated ? "#" : "/login"}>
+                {isAuthenticated && user.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={user.name || "Account"}
+                    width={26}
+                    height={26}
+                    className="h-[26px] w-[26px] cursor-pointer rounded-full object-cover ring-1 ring-pink-100 transition hover:ring-pink-300"
+                  />
+                ) : (
+                  <FiUser
+                    size={22}
+                    className="cursor-pointer text-slate-600 transition hover:text-pink-500"
+                  />
+                )}
               </Link>
 
-              {token && (
+              {isAuthenticated && (
                 <div className="absolute right-0 hidden pt-5 group-hover:block">
-                  <ul className="w-44 rounded-2xl border border-pink-100 bg-white p-2 text-sm shadow-xl">
+                  <div className="w-56 rounded-2xl border border-pink-100 bg-white p-2 text-sm shadow-xl">
+                    <div className="flex items-center gap-3 rounded-xl px-3 py-2.5">
+                      {user.avatar ? (
+                        <Image
+                          src={user.avatar}
+                          alt={user.name || "Account"}
+                          width={36}
+                          height={36}
+                          className="h-9 w-9 shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pink-50 text-pink-500">
+                          <FiUser size={18} />
+                        </div>
+                      )}
+
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-gray-900">
+                          {user.name}
+                        </p>
+                        <p className="truncate text-xs text-gray-400">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="my-1 h-px bg-pink-50" />
+
+                    <ul>
+                    {isAdmin ? (
+                    <li>
+                      <Link
+                        href="/dashboard"
+                        className="block rounded-xl px-4 py-2 text-gray-600 transition hover:bg-pink-50 hover:text-pink-500"
+                      >
+                        Dashboard
+                      </Link>
+                    </li>
+                    ) : (
+                    <>
                     <li>
                       <Link
                         href="/profile"
@@ -123,13 +184,21 @@ export default function Navbar() {
                         Wishlist
                       </Link>
                     </li>
+                    </>
+                    )}
 
                     <li>
-                      <button className="block w-full rounded-xl px-4 py-2 text-left text-gray-600 transition hover:bg-pink-50 hover:text-pink-500">
-                        Logout
-                      </button>
+                      <form action={logoutUser}>
+                        <button
+                          type="submit"
+                          className="block w-full rounded-xl px-4 py-2 text-left text-gray-600 transition hover:bg-pink-50 hover:text-pink-500"
+                        >
+                          Logout
+                        </button>
+                      </form>
                     </li>
-                  </ul>
+                    </ul>
+                  </div>
                 </div>
               )}
             </div>
@@ -244,13 +313,52 @@ export default function Navbar() {
 
           {/* Bottom CTA */}
           <div className="mt-auto border-t border-pink-100 p-5">
+            {isAuthenticated && (
+              <div className="mb-3 flex items-center gap-3 px-1">
+                {user.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={user.name || "Account"}
+                    width={36}
+                    height={36}
+                    className="h-9 w-9 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pink-50 text-pink-500">
+                    <FiUser size={18} />
+                  </div>
+                )}
+
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-gray-900">
+                    {user.name}
+                  </p>
+                  <p className="truncate text-xs text-gray-400">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <Link
-              href="/login"
+              href={mobileAccountHref}
               onClick={() => setVisible(false)}
               className="block w-full rounded-xl border border-pink-200 px-4 py-3 text-center text-sm font-medium text-pink-500 transition hover:bg-pink-50"
             >
-              Login
+              {mobileAccountLabel}
             </Link>
+
+            {isAuthenticated && (
+              <form action={logoutUser}>
+                <button
+                  type="submit"
+                  onClick={() => setVisible(false)}
+                  className="mt-3 block w-full rounded-xl border border-pink-200 px-4 py-3 text-center text-sm font-medium text-pink-500 transition hover:bg-pink-50"
+                >
+                  Logout
+                </button>
+              </form>
+            )}
 
             <Link
               href="/shop"

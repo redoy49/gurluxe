@@ -25,12 +25,22 @@ export default function CheckoutClient({ settings }) {
     address: "",
   });
 
-  const [payment, setPayment] = useState("cod");
+  const [payment, setPayment] = useState(settings.codEnabled ? "cod" : "");
+  const [transactionId, setTransactionId] = useState("");
+  const [senderNumber, setSenderNumber] = useState("");
+  const [paymentErrors, setPaymentErrors] = useState({});
+  const [coupon, setCoupon] = useState(null);
   const [isPlacing, startPlacing] = useTransition();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleTransactionFieldChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "transactionId") setTransactionId(value);
+    if (name === "senderNumber") setSenderNumber(value);
   };
 
   const subtotal = cart.items.reduce(
@@ -56,8 +66,29 @@ export default function CheckoutClient({ settings }) {
       return;
     }
 
+    if (payment !== "cod") {
+      const errors = {};
+      if (!transactionId.trim()) {
+        errors.transactionId = "Enter the Transaction ID from your payment";
+      }
+      if (!senderNumber.trim()) {
+        errors.senderNumber = "Enter the number you paid from";
+      }
+      setPaymentErrors(errors);
+      if (Object.keys(errors).length > 0) {
+        toast.error("Please complete your payment details");
+        return;
+      }
+    }
+
     startPlacing(async () => {
-      const result = await placeOrder({ customer: formData, payment });
+      const result = await placeOrder({
+        customer: formData,
+        payment,
+        couponCode: coupon?.code || "",
+        transactionId,
+        senderNumber,
+      });
 
       if (result.success) {
         toast.success("Order placed successfully");
@@ -104,13 +135,24 @@ export default function CheckoutClient({ settings }) {
         <div className="mt-14 grid gap-10 lg:grid-cols-[1fr_380px]">
           <div>
             <AddressForm formData={formData} onChange={handleChange} />
-            <PaymentMethod payment={payment} setPayment={setPayment} />
+            <PaymentMethod
+              payment={payment}
+              setPayment={setPayment}
+              settings={settings}
+              transactionId={transactionId}
+              senderNumber={senderNumber}
+              onTransactionFieldChange={handleTransactionFieldChange}
+              errors={paymentErrors}
+            />
           </div>
 
           <OrderSummary
             cartItems={cart.items}
             shipping={shipping}
-            discount={0}
+            discount={coupon?.discount || 0}
+            coupon={coupon}
+            onApplyCoupon={setCoupon}
+            onRemoveCoupon={() => setCoupon(null)}
             onPlaceOrder={handlePlaceOrder}
             isPlacing={isPlacing}
           />

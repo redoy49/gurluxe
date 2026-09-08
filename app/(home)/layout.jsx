@@ -1,10 +1,13 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { getCurrentUser } from "@/lib/auth/session";
 
-export default function HomeLayout({ children }) {
+export default async function HomeLayout({ children }) {
+  const user = await getCurrentUser();
+
   return (
     <>
-      <Navbar />
+      <Navbar user={user} />
       <main>{children}</main>
       <Footer />
     </>

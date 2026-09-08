@@ -7,8 +7,17 @@ import { uploadToCloudinary } from "@/lib/cloudinary/upload";
 import { deleteFromCloudinary } from "@/lib/cloudinary/destroy";
 import { generateSlug } from "@/lib/utils/generateSlug";
 import { productSchema } from "@/lib/validations/product.schema";
+import { requireAdminAction } from "@/lib/auth/authorize";
+
+const FORBIDDEN = {
+  success: false,
+  message: "Forbidden: admin access required.",
+};
 
 export async function addProduct(formData) {
+  const { authorized } = await requireAdminAction();
+  if (!authorized) return FORBIDDEN;
+
   try {
     const db = await dbConnect();
 
@@ -104,6 +113,9 @@ export async function addProduct(formData) {
 }
 
 export async function getProducts() {
+  const { authorized } = await requireAdminAction();
+  if (!authorized) return [];
+
   const db = await dbConnect();
 
   const products = await db
@@ -116,6 +128,9 @@ export async function getProducts() {
 }
 
 export async function getProductById(id) {
+  const { authorized } = await requireAdminAction();
+  if (!authorized) return null;
+
   const db = await dbConnect();
 
   const product = await db.collection("products").findOne({
@@ -131,6 +146,9 @@ export async function getProductById(id) {
 }
 
 export async function updateProduct(formData) {
+  const { authorized } = await requireAdminAction();
+  if (!authorized) return FORBIDDEN;
+
   try {
     const db = await dbConnect();
 
@@ -218,6 +236,9 @@ export async function updateProduct(formData) {
 }
 
 export async function deleteProduct(id) {
+  const { authorized } = await requireAdminAction();
+  if (!authorized) return FORBIDDEN;
+
   try {
     const db = await dbConnect();
 

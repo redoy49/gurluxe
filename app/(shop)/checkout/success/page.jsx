@@ -106,11 +106,27 @@ export default async function CheckoutSuccessPage({ searchParams }) {
                   : `৳ ${order.amounts.shipping.toLocaleString()}`}
               </span>
             </div>
-            <div className="flex justify-between pt-2 text-base font-semibold text-gray-900">
+            {order.amounts.discount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>
+                  Discount{order.couponCode ? ` (${order.couponCode})` : ""}
+                </span>
+                <span>- ৳ {order.amounts.discount.toLocaleString()}</span>
+              </div>
+            )}
+            <div className="flex justify-between border-t border-gray-100 pt-2 text-base font-semibold text-gray-900">
               <span>Total</span>
               <span>৳ {order.amounts.total.toLocaleString()}</span>
             </div>
           </div>
+
+          {order.payment.method !== "cod" && (
+            <p className="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-xs text-amber-700">
+              We&apos;re verifying your {PAYMENT_LABELS[order.payment.method]}{" "}
+              payment — you&apos;ll see your order confirmed once that&apos;s
+              done.
+            </p>
+          )}
         </div>
 
         <div className="mt-8 flex justify-center">
